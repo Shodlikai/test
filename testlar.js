@@ -2528,3 +2528,48 @@ document.addEventListener('DOMContentLoaded', () => {
     updateResults(); // Sahifa yuklanganda natijalarni boshlang'ich holatga keltirish
     loadQuestions();
 });
+
+// --- TAYMER LOGIKASI ---
+
+let startTime;
+let timerInterval;
+
+/**
+ * Taymerni ishga tushiradi va sanashni boshlaydi.
+ */
+function startTimer() {
+    // Agar taymer allaqachon ishlayotgan bo'lsa, avval to'xtatiladi
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    
+    startTime = Date.now();
+    // Har 1000 millisekund (1 soniya)da updateTimer funksiyasini chaqirish
+    timerInterval = setInterval(updateTimer, 1000); 
+}
+
+/**
+ * O'tgan vaqtni hisoblaydi va HTML elementiga joylaydi.
+ */
+function updateTimer() {
+    const elapsedTime = Date.now() - startTime;
+    const totalSeconds = Math.floor(elapsedTime / 1000);
+    
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    // Vaqtni "MM:SS" formatida ko'rsatish
+    const formattedTime = 
+        String(minutes).padStart(2, '0') + ':' + 
+        String(seconds).padStart(2, '0');
+
+    document.getElementById('timer').textContent = formattedTime;
+}
+
+// Sahifa yuklanganda taymerni avtomatik ishga tushirish
+window.onload = function() {
+    startTimer();
+    
+    // Agar bu yerda testlar.js ga tegishli boshqa funksiyalar bo'lsa, ularni ham chaqiring
+    // Masalan: loadQuestions();
+}; 

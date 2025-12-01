@@ -248,3 +248,53 @@ h1 {
         font-size: 1em;
     }
 }
+.contact-btn {
+    /* 'A' tegi uchun zaruriy uslublar */
+    display: inline-block;
+    text-align: center;
+    text-decoration: none; 
+    
+    /* Umumiy vizual uslublar (Keyingi kabi) */
+    padding: 5px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s, color 0.3s;
+    
+    /* Boshqacha Dizayn: Outline/Ghost style */
+    background-color: transparent; /* Shaffof fon */
+    color: #9ksks2d; /* Kulrang matn rangi */
+    border: 2px solid #6c757d; /* Kulrang chegara */
+}
+
+.contact-btn:hover {
+    background-color: #6c757d; /* Ustiga kelganda rang to'ldiriladi */
+    color: white; /* Matn oq rangga o'tadi */
+    transform: scale(1.02);
+}
+
+
+/* --- ZAMONAVIY TAYMER UCHUN CSS --- */
+.timer-fixed {
+    position: fixed; /* Sahifada qadalgan holatda turadi */
+    top: 20px; /* Yuqoridan masofa */
+    right: 20px; /* O'ng tomondan masofa */
+    z-index: 1000; /* Boshqa elementlardan ustun turishi uchun */
+    
+    /* Dizayn */
+    background: rgba(4, 170, 109, 0.45); /* Yashil rang, biroz shaffof */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px; /* Tablet shaklida yumaloq burchaklar */
+    font-size: 1.1em;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Yumshoq soyalar */
+    font-family: 'Consolas', monospace; 
+    transition: background 0.3s;
+}
+
+.timer-fixed:hover {
+    background: rgba(4, 170, 109, 1); /* Ustiga kelganda to'liq rang */
+}
+
