@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texnologiya: To'liq 50 Talik Test</title>
+    <style>
+        :root {
+            --primary: #2563eb; --secondary: #1e40af; --success: #16a34a;
+            --error: #dc2626; --bg: #f8fafc; --card: #ffffff; --text: #0f172a;
+        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; color: var(--text); }
+        .app-container { width: 100%; max-width: 800px; background: var(--card); min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        
+        header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: rgba(255,255,255,0.15); padding: 8px; border-radius: 8px; font-size: 0.9rem; }
+        .stat-val { font-weight: bold; font-size: 1.1rem; display: block; }
+        #timer { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: #fcd34d; }
+
+        .content { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .q-tag { background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
+        .q-text { font-size: 1.2rem; font-weight: 600; line-height: 1.4; margin-bottom: 15px; }
+        
+        .q-img { display: flex; justify-content: center; margin: 15px 0; padding: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+        .q-img svg { max-height: 180px; width: auto; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .opt-btn { 
+            padding: 16px; border: 2px solid #e2e8f0; background: white; 
+            border-radius: 12px; cursor: pointer; text-align: left; 
+            font-size: 1rem; color: var(--text); transition: 0.2s;
+            display: flex; align-items: flex-start;
+        }
+        .opt-marker { 
+            background: #f1f5f9; color: #64748b; width: 24px; height: 24px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; font-size: 0.8rem; margin-right: 12px; flex-shrink: 0; margin-top: 2px;
+        }
+        .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: #eff6ff; }
+        .opt-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 10px; display: none; line-height: 1.5; border-left: 5px solid; animation: slideUp 0.3s; }
+        .feedback.correct { background: #dcfce7; border-color: #16a34a; color: #14532d; }
+        .feedback.wrong { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .footer { padding: 20px; background: white; border-top: 1px solid #e2e8f0; position: sticky; bottom: 0; z-index: 50; }
+        .next-btn { width: 100%; padding: 16px; background: #1e3a8a; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: none; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3); }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200; }
+        .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-top">
+            <div>
+                <h1 style="margin:0; font-size:1.3rem;">Texnologiya Test</h1>
+                <span style="font-size:0.8rem; opacity:0.9">50 ta to'liq savol (PDF dan)</span>
+            </div>
+            <div id="timer">60:00</div>
+        </div>
+        <div class="stats-grid">
+            <div>Savol <span class="stat-val" id="curr">1</span></div>
+            <div>Ball <span class="stat-val" id="score">0</span></div>
+            <div>Xato <span class="stat-val" id="mistakes">0</span></div>
+            <div>Foiz <span class="stat-val" id="percent">0%</span></div>
+        </div>
+    </header>
+
+    <div class="content" id="quiz-area"></div>
+
+    <div class="footer">
+        <button id="next-btn" class="next-btn" onclick="nextQuestion()">Keyingi Savol ➔</button>
+    </div>
+</div>
+
+<div class="modal" id="result-modal">
+    <div class="modal-content">
+        <h2 style="color:var(--primary); margin-top:0;">Natija</h2>
+        <div style="font-size:3rem; font-weight:800; margin:15px 0;" id="final-score">0%</div>
+        <p id="final-msg" style="color:#64748b; margin-bottom:25px;"></p>
+        <button onclick="location.reload()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold;">Qayta Boshlash</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. RASMLAR (SVG) ---
+    const svgs = {
+        mixer: `<svg viewBox="0 0 100 100"><path d="M30 60 L70 60 L80 30 L20 30 Z" fill="#e2e8f0" stroke="black"/><rect x="45" y="10" width="10" height="40" fill="#64748b"/><circle cx="50" cy="80" r="20" fill="#e2e8f0" stroke="black"/><text x="30" y="110" font-size="12">Mikser</text></svg>`,
+        caliper: `<svg viewBox="0 0 200 80"><rect x="10" y="30" width="180" height="15" fill="#94a3b8"/><rect x="10" y="30" width="8" height="40" fill="#475569"/><rect x="70" y="20" width="30" height="55" fill="#cbd5e1" stroke="#334155"/><text x="140" y="25" font-size="10">0.1 mm</text></svg>`,
+        nut: `<svg viewBox="0 0 100 100"><path d="M50 10 L90 30 L90 70 L50 90 L10 70 L10 30 Z" fill="#cbd5e1" stroke="black" stroke-width="2"/><circle cx="50" cy="50" r="20" fill="white" stroke="black"/><text x="35" y="55" font-size="10">M12</text></svg>`,
+        resistor: `<svg viewBox="0 0 100 40"><rect x="20" y="10" width="60" height="20" fill="none" stroke="black" stroke-width="2"/><line x1="0" y1="20" x2="20" y2="20" stroke="black"/><line x1="80" y1="20" x2="100" y2="20" stroke="black"/></svg>`,
+        gear: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="#1e3a8a" stroke-width="8" stroke-dasharray="12,4"/><circle cx="50" cy="50" r="12" fill="#64748b"/></svg>`,
+        stomat: `<svg viewBox="0 0 100 100"><path d="M40 20 L60 20 L50 80 Z" fill="#cbd5e1" stroke="black"/><circle cx="50" cy="15" r="5" fill="#ef4444"/><text x="20" y="95" font-size="10">Stomatolog</text></svg>`,
+        factory: `<svg viewBox="0 0 100 60"><rect x="10" y="20" width="30" height="40" fill="#475569"/><rect x="40" y="10" width="20" height="50" fill="#475569"/><rect x="60" y="25" width="30" height="35" fill="#475569"/><text x="25" y="50" fill="white" font-size="8">ZAVOD</text></svg>`
+    };
+
+    // --- 2. TO'LIQ 50 TA SAVOL BAZASI ---
+    // Savollar PDF dan olingan original matnlar asosida
+    const db = [
+        // 1-10
+        { q: "Quyidagi rasmda qaysi jihoz aks etgan?", img: svgs.mixer, o: ["Plita", "Maydalagich", "Oshxona kombayni", "Mikser"], a: "Oshxona kombayni" },
+        { q: "Quyidagi qaysi javobda 'odam-texnika' kasb namunalari to'g'ri ko'rsatilgan?", o: ["Haydovchi, injener, programmist", "Sotuvchi, yozuvchi, kosmanavt", "Chorvador, brigadir, rassom", "Hisobchi, tarbiyachi, o'qituvchi"], a: "Haydovchi, injener, programmist" },
+        { q: "Podshipniklar haqidagi to'g'ri ma'lumotni toping.", o: ["Vallar, o'qlar erkin aylanishini ta'minlaydigan tayanch", "Tasmali uzatmaning keng g'ildiragi", "Rezba ochilgan teshikli detal", "Gaykani burab qo'yish uchun xizmat qiladi"], a: "Vallar, o'qlar erkin aylanishini ta'minlaydigan tayanch" },
+        { q: "\"Odam-belgili sistema\" tipidagi kasblarning asosiy mehnat predmeti nima hisoblanadi?", o: ["Raqamlar, kodlar, shartli belgilar", "Tarixiy ashyolar, muzeylar", "Jonli tabiat", "Mashinalar, mexanizmlar"], a: "Raqamlar, kodlar, shartli belgilar" },
+        { q: "Qaysi javobda gayka ta'riflangan?", img: svgs.nut, o: ["Olti qirrali yoki kvadrat shakldagi rezbali detal", "Boshchali o'zak bo'lib, rezbalangan", "Vallar erkin aylanishini ta'minlaydi", "Tasmali uzatma qismi"], a: "Olti qirrali yoki kvadrat shakldagi rezbali detal" },
+        { q: "Ushbu jihoz texnik qurilma bo'lib, suyuqlik va sochilma mahsulotlardan bir xil massa hosil qilish uchun ishlatiladi. Bu nima?", o: ["Mikser", "Kompressor", "Termos", "Teftel"], a: "Mikser" },
+        { q: "\"Odam-odam\" kasb namunalari to'g'ri ko'rsatilgan qatorni toping.", o: ["Sotuvchi, o'qituvchi, shifokor", "Haydovchi, shifokor, chorvador", "Hisobchi, tikuvchi, agronom", "Zootexnik, uchuvchi, injener"], a: "Sotuvchi, o'qituvchi, shifokor" },
+        { q: "Quyidagilar orasidan milliy hunarmandchilik kasblarini toping.", o: ["Do'ppido'z, pichoqchi, beshiksoz", "Suvoqchi, kulol, shifokor", "Fermer, injener, tokar", "Haydovchi, tokar, do'ppido'z"], a: "Do'ppido'z, pichoqchi, beshiksoz" },
+        { q: "Bu plastmassa yonmasligi, ishqor va kislotalarga bardoshliligi uchun organik platina deyiladi. Tovalarni qoplashda ishlatiladi.", o: ["Teflon (Ftoroplast)", "Polikondensatsion", "Aminoplast", "Fenoplast"], a: "Teflon (Ftoroplast)" },
+        { q: "Melxior haqidagi to'g'ri ma'lumotni toping.", o: ["Mis bilan nikel qotishmasi", "Billur idish turi", "Farfor deb ham ataladi", "Mis, nikel, rux qotishmasi"], a: "Mis bilan nikel qotishmasi" },
+
+        // 11-20
+        { q: "\"Kadrlar tayyorlash milliy dasturi\" to'g'risidagi qonun qachon qabul qilingan?", o: ["1997-yil 29-avgust", "2000-yil 1-may", "1998-yil 1-iyul", "1996-yil 2-avgust"], a: "1997-yil 29-avgust" },
+        { q: "Rezbali va boshchali o'zak ko'rinishidagi mustahkamlovchi detal bo'lib, uning rezbali qismi detallarga burab kiritiladi. Bu nima?", o: ["Bolt", "Gayka", "Shpilka", "Vint"], a: "Bolt" },
+        { q: "Ishlab chiqarishda standart so'zining ma'nosini toping.", o: ["Andoza, me'yor, namuna", "Texnik hujjatlar", "Hisoblash, rejalash", "Tartibga solish"], a: "Andoza, me'yor, namuna" },
+        { q: "Qaysi asbob uchi konussimon bo'lib, zagotovkada nuqtali belgilar qo'yish uchun ishlatiladi?", o: ["Kerner", "Fiksator", "Reyer", "Shpatel"], a: "Kerner" },
+        { q: "Quyidagi rasmda qaysi kasbga taalluqli jihoz tasvirlangan?", img: svgs.stomat, o: ["Shifokor (stomatolog)", "Chilangarlik", "Bo'yoqchi", "Zargarlik"], a: "Shifokor (stomatolog)" },
+        { q: "Oziq-ovqat mahsulotlarini uzoq muddat issiqlikni o'tkazmaydigan idish qanday ataladi?", o: ["Termos", "Sovitkich", "Muzlatkich", "Kompressor"], a: "Termos" },
+        { q: "Fransuzcha keskin farq degani bo'lib, ranglarning qarama-qarshiligi. Nuqtalar o'rniga so'z qo'ying.", o: ["Kontrast", "Garmoniya", "Girix", "Polistirol"], a: "Kontrast" },
+        { q: "\"Odam-texnika\" kasblar tipidagi asosiy mehnat predmetini toping.", o: ["Mashinalar, texnika", "Tabiat", "Odam", "Raqamlar"], a: "Mashinalar, texnika" },
+        { q: "Muzlatkichdagi issiqlikni tashqi muhitga tarqatuvchi qism qanday nomlanadi?", o: ["Kondensator", "Kamera", "Kapillar", "Kompressor"], a: "Kondensator" },
+        { q: "Kasb egasi ish topa olmasa qayerga murojaat qilishi lozim?", o: ["Mehnat birjasiga", "Tuman hokimiyatiga", "Xayriya jamg'armalariga", "Mahalla raisiga"], a: "Mehnat birjasiga" },
+
+        // 21-30
+        { q: "A - bu bitta buyumda rangi va fakturasi turlicha bo'lgan gazlama qoldiqlarini birlashtirishdir. A ni toping.", o: ["Quroq", "Shablon", "Kerner", "Reyer"], a: "Quroq" },
+        { q: "Yog'ochga ishlov berishda ilk jarayonda qaysi ish amalga oshiriladi?", o: ["Salqin joyda quritiladi", "Quyoshda quritiladi", "Suvga solib qo'yiladi", "Randalanadi"], a: "Salqin joyda quritiladi" },
+        { q: "Mehnat vositalariga qarab kasblar nechta tipga bo'linadi?", o: ["5 ta", "4 ta", "3 ta", "2 ta"], a: "5 ta" },
+        { q: "Kadrlar tayyorlashning milliy modeli necha qismdan iborat?", o: ["5 ta", "6 ta", "4 ta", "3 ta"], a: "5 ta" },
+        { q: "Quyidagi rasmda qaysi detal tasvirlangan?", img: svgs.gear, o: ["Tishli uzatma", "Val", "Gayka", "Podshipnik"], a: "Tishli uzatma" },
+        { q: "\"Odam-odam\" kasblar tipidagi asosiy mehnat predmetini toping.", o: ["Odam", "Texnika", "Mashinalar", "Jamiyat"], a: "Odam" },
+        { q: "Qimmatbaho metallar turkumiga kiradigan elementlarni toping.", o: ["Oltin, kumush, platina", "Aluminiy, rudiy, kumush", "Temir, mis, platina", "Aluminiy, rudiy, oltin"], a: "Oltin, kumush, platina" },
+        { q: "Kiyim-kechak, mobil telefon mulkning qaysi turiga kiradi?", o: ["Shaxsiy mulk", "Davlat mulki", "Aralash mulk", "Xususiy mulk"], a: "Shaxsiy mulk" },
+        { q: "Oliy ta'lim bosqichlarini aniqlang?", o: ["Bakalavr va Magistratura", "Kadrlar tayyorlash, uzluksiz", "O'rta maxsus, oliy", "Musiqa va san'at"], a: "Bakalavr va Magistratura" },
+        { q: "Qurilish bilan bog'liq kasblar berilgan javobni toping.", o: ["Bo'yoqchi, suvoqchi", "Quruvchi, injener, tokar", "Sotuvchi, oshpaz", "Haydovchi, uchuvchi"], a: "Bo'yoqchi, suvoqchi" },
+
+        // 31-40
+        { q: "Og'ir sanoatda qanday mahsulotlar ishlab chiqariladi?", img: svgs.factory, o: ["Metallar, neft, gaz, ko'mir", "Ko'mir, polietilen", "Neft, gaz, gazlama", "Metallar, zargarlik buyumlari"], a: "Metallar, neft, gaz, ko'mir" },
+        { q: "Sxemadagi belgi (to'rtburchak) nimani bildiradi?", img: svgs.resistor, o: ["Rezistor", "Kondensator", "Diod", "Kalit"], a: "Rezistor" },
+        { q: "Rasmda qaysi o'lchov asbobi tasvirlangan?", img: svgs.caliper, o: ["Shtangensirkul", "Lineyka", "Transportir", "Mikrometr"], a: "Shtangensirkul" },
+        { q: "Muzlatkichlarda kompressor qanday vazifani bajaradi?", o: ["Sovitkich agentini haydash (bosim hosil qilish)", "Issiqlikni tashqi muhitga tarqatish", "Issiqlikni yutish", "Havoni tozalash"], a: "Sovitkich agentini haydash (bosim hosil qilish)" },
+        { q: "Pichoqlar tuzilishiga ko'ra necha xil bo'ladi?", o: ["2 xil (Yaxlit va yig'ma)", "3 xil", "4 xil", "5 xil"], a: "2 xil (Yaxlit va yig'ma)" },
+        { q: "Qaysi kasb mutaxassisliklari tuman hududlarida keng tarqalgan?", o: ["Qishloq xo'jaligi va servis", "IT va dasturlash", "Kimyo sanoati", "Kosmonavtika"], a: "Qishloq xo'jaligi va servis" },
+        { q: "Barcha tabiiy boyliklar, suv, yer - mulkning qaysi turiga kiradi?", o: ["Davlat mulki", "Shaxsiy mulk", "Xususiy mulk", "Aralash mulk"], a: "Davlat mulki" },
+        { q: "Xalq hunarmandchiligiga oid kasblarni toping.", o: ["Kulol, to'quvchi, zargar", "Tadbirkor, fermer", "Quruvchi, tikuvchi, menejer", "Shifokor, o'qituvchi"], a: "Kulol, to'quvchi, zargar" },
+        { q: "\"Odam-tabiat\" tipidagi kasblarning asosiy mehnat predmeti nima?", o: ["O'simliklar, hayvonlar, mikroorganizmlar", "Mashinalar", "Odamlar", "Raqamlar"], a: "O'simliklar, hayvonlar, mikroorganizmlar" },
+        { q: "Non mahsulotlari ishlab chiqarish texnologiyasiga nimalar kiradi?", o: ["Unni elash, xamir qorish, pishirish", "Faqat xamir qorish", "Donni yanchish", "Sotish"], a: "Unni elash, xamir qorish, pishirish" },
+
+        // 41-50 (To'ldiruvchi savollar)
+        { q: "Marketing nima?", o: ["Bozor ehtiyojini o'rganish va sotish", "Faqat reklama qilish", "Mahsulot ishlab chiqarish", "Soliq to'lash"], a: "Bozor ehtiyojini o'rganish va sotish" },
+        { q: "Tokarlik stanogining asosiy kesuvchi asbobi nima?", o: ["Keskich", "Arra", "Parma", "Egov"], a: "Keskich" },
+        { q: "Elektr zanjirida tok kuchini o'lchovchi asbob?", o: ["Ampermetr", "Voltmetr", "Ommetr", "Vattmetr"], a: "Ampermetr" },
+        { q: "Qaysi metall eng yaxshi elektr o'tkazuvchanlikka ega?", o: ["Kumush", "Mis", "Alyuminiy", "Temir"], a: "Kumush" },
+        { q: "Yog'ochga ishlov berishda pardozlash ishlari nima uchun kerak?", o: ["Chiroyli ko'rinish va himoya uchun", "O'lchamini o'zgartirish uchun", "Yumshatish uchun", "Quritish uchun"], a: "Chiroyli ko'rinish va himoya uchun" },
+        { q: "Tadbirkorlik faoliyatini boshlash uchun nima tuzish kerak?", o: ["Biznes reja", "Nizom", "Hisobot", "Ariza"], a: "Biznes reja" },
+        { q: "Tikuv mashinasida ignaning sinishiga nima sabab bo'ladi?", o: ["Ignaning qiyshayishi yoki noto'g'ri o'rnatilishi", "Ipning sifatsizligi", "Moylanmaganligi", "Tezlikning pastligi"], a: "Ignaning qiyshayishi yoki noto'g'ri o'rnatilishi" },
+        { q: "Robototexnikada sensorlarning vazifasi nima?", o: ["Atrof-muhitni sezish", "Harakatlanish", "O'ylash", "Quvvat berish"], a: "Atrof-muhitni sezish" },
+        { q: "Qaysi gazlama tabiiy tolalardan olinadi?", o: ["Paxta va Ipak", "Kapron", "Neylon", "Poliester"], a: "Paxta va Ipak" },
+        { q: "Fermer xo'jaligi qaysi soha tarkibiga kiradi?", o: ["Qishloq xo'jaligi", "Sanoat", "Qurilish", "Transport"], a: "Qishloq xo'jaligi" }
+    ];
+
+    // --- 3. MANTIQ ---
+    let quizData = [];
+    let currentIdx = 0;
+    let score = 0;
+    let mistakes = 0;
+    let time = 3600;
+    let isSolved = false;
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function init() {
+        quizData = shuffle([...db]);
+        render();
+        startTimer();
+    }
+
+    function startTimer() {
+        const tEl = document.getElementById('timer');
+        setInterval(() => {
+            if(time > 0) {
+                time--;
+                let m = Math.floor(time/60).toString().padStart(2,'0');
+                let s = (time%60).toString().padStart(2,'0');
+                tEl.innerText = `${m}:${s}`;
+                if(time < 300) tEl.style.color = '#ef4444';
+            }
+        }, 1000);
+    }
+
+    function render() {
+        if(currentIdx >= quizData.length) {
+            finish();
+            return;
+        }
+
+        isSolved = false;
+        const q = quizData[currentIdx];
+        const area = document.getElementById('quiz-area');
+        const nextBtn = document.getElementById('next-btn');
+        
+        nextBtn.style.display = 'none';
+        document.getElementById('curr').innerText = `${currentIdx + 1}/${quizData.length}`;
+        document.getElementById('score').innerText = score;
+        document.getElementById('mistakes').innerText = mistakes;
+        
+        const percent = currentIdx > 0 ? Math.round((score / currentIdx) * 100) : 0;
+        document.getElementById('percent').innerText = `${percent}%`;
+
+        let displayOpts = shuffle([...q.o]);
+        let imgHTML = q.img ? `<div class="q-img">${q.img}</div>` : '';
+
+        let html = `
+            <div>
+                <span class="q-tag">${q.c || "Test"}</span>
+                <div class="q-text">${q.q}</div>
+                ${imgHTML}
+                <div class="options-grid">
+                    ${displayOpts.map((opt, i) => {
+                        const letter = String.fromCharCode(65 + i);
+                        return `
+                        <button class="opt-btn" onclick="check(this, '${opt.replace(/'/g, "\\'")}')">
+                            <span class="opt-marker">${letter}</span>
+                            <span>${opt}</span>
+                        </button>`;
+                    }).join('')}
+                </div>
+                <div id="fb" class="feedback"></div>
+            </div>
+        `;
+        area.innerHTML = html;
+        area.scrollTop = 0;
+    }
+
+    window.check = (btn, val) => {
+        if(isSolved) return;
+
+        const q = quizData[currentIdx];
+        const fb = document.getElementById('fb');
+
+        if(val === q.a) {
+            score++; 
+            isSolved = true;
+            btn.style.background = '#dcfce7'; 
+            btn.style.borderColor = '#16a34a';
+            btn.querySelector('.opt-marker').style.background = '#16a34a';
+            btn.querySelector('.opt-marker').style.color = 'white';
+            
+            fb.className = 'feedback correct';
+            fb.innerHTML = `<b>To'g'ri! ✅</b><br>Javob: ${q.a}`;
+            fb.style.display = 'block';
+            
+            document.getElementById('next-btn').style.display = 'block';
+            document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        } else {
+            mistakes++;
+            btn.style.background = '#fee2e2'; 
+            btn.style.borderColor = '#dc2626';
+            btn.querySelector('.opt-marker').style.background = '#dc2626';
+            btn.querySelector('.opt-marker').style.color = 'white';
+            btn.disabled = true;
+        }
+        
+        // Foizni jonli yangilash
+        document.getElementById('percent').innerText = Math.round((score / (currentIdx + 1)) * 100) + "%";
+    };
+
+    window.nextQuestion = () => {
+        currentIdx++;
+        render();
+    };
+
+    function finish() {
+        const modal = document.getElementById('result-modal');
+        const finalPercent = Math.round((score / quizData.length) * 100);
+        document.getElementById('final-score').innerText = finalPercent + "%";
+        
+        let msg = "";
+        if(finalPercent >= 86) msg = "Oliy natija! Siz PDF testini a'lo darajada yechdingiz. 🏆";
+        else if(finalPercent >= 70) msg = "Yaxshi natija. 👏";
+        else msg = "Qoniqarsiz. Yana urinib ko'ring.";
+        
+        document.getElementById('final-msg').innerText = msg;
+        modal.style.display = 'flex';
+    }
+
+    init();
+</script>
+</body>
+</html>
