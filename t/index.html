@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texnologiya: Trenajyor 2026</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #4338ca;
+            --success: #16a34a;
+            --error: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --timer-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        h1 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+        .subtitle { font-size: 0.85rem; opacity: 0.9; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 8px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-item { text-align: center; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 2px; }
+        .stat-value { font-weight: 700; font-size: 1rem; }
+        .timer-val { color: var(--timer-color); font-family: monospace; font-size: 1.1rem; }
+
+        /* CONTENT */
+        .content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .question-card {
+            background: #fff;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tags-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .tag {
+            background: #e0e7ff;
+            color: var(--secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.2s;
+            position: relative;
+            color: #334155;
+        }
+        
+        .option-marker {
+            width: 24px; height: 24px;
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #eef2ff; }
+        .option-btn:active:not(:disabled) { transform: scale(0.99); }
+        .option-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* FEEDBACK */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid;
+            display: none;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .feedback-box.correct { background: #f0fdf4; border-color: var(--success); color: #14532d; }
+        .feedback-header { font-weight: 800; margin-bottom: 8px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+
+        /* FOOTER */
+        .footer {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            position: sticky;
+            bottom: 0;
+            z-index: 50;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 16px;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .next-btn:hover { background: #1e293b; transform: translateY(-2px); }
+
+        /* MODAL */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px;
+            text-align: center; width: 90%; max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .result-circle {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #e0e7ff; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 800; margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-top">
+            <div>
+                <h1>Texnologiya</h1>
+                <div class="subtitle">Trenajyor 2026</div>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item"><span class="stat-label">Savol</span><span class="stat-value"><span id="curr">1</span>/<span id="total">0</span></span></div>
+            <div class="stat-item"><span class="stat-label">Ball</span><span class="stat-value" id="score">0</span></div>
+            <div class="stat-item"><span class="stat-label">Xato</span><span class="stat-value" id="mistakes">0</span></div>
+            <div class="stat-item"><span class="stat-label">Vaqt</span><span class="timer-val" id="timer">60:00</span></div>
+        </div>
+    </header>
+
+    <div class="content" id="quiz-area"></div>
+
+    <div class="footer">
+        <button id="next-btn" class="next-btn" onclick="nextQuestion()">Keyingi Savol ➔</button>
+    </div>
+</div>
+
+<div class="modal" id="result-modal">
+    <div class="modal-content">
+        <div class="result-circle" id="res-percent">0%</div>
+        <h2 id="res-title" style="margin-bottom:10px;">Natija</h2>
+        <p id="res-desc" style="color:#64748b; margin-bottom:25px; line-height:1.5;"></p>
+        <button onclick="restartGame()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Qayta Boshlash</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // SAVOLLAR BAZASI (50+ Sara Savol)
+    // ==========================================
+    const questionsDB = [
+        {
+            c: "Materialshunoslik",
+            q: "Faner (Phaner) nima va u qanday tayyorlanadi?",
+            o: ["Shpon qatlamlarini yelimlash orqali olinadi", "Yog'och qirindisini presslash orqali (DSP)", "Yaxlit yog'ochni yupqa qilib kesish orqali", "Qog'oz qatlamlarini presslash orqali"],
+            a: "Shpon qatlamlarini yelimlash orqali olinadi",
+            exp: "<b>Izoh:</b> Faner — bu yaxlit yog'och emas, balki maxsus yelim bilan biriktirilgan toq sonli (3, 5..) shpon qatlamlaridir. Qatlamlar tolalari bir-biriga perpendikulyar joylashadi, bu uning mustahkamligini oshiradi."
+        },
+        {
+            c: "Asboblar",
+            q: "Yupqa metall tunukalarni (0.5 mm gacha) qirqish uchun qaysi asbob eng samarali?",
+            o: ["Chilangar qaychisi", "Lobzik arra", "Temir arra", "Ombir"],
+            a: "Chilangar qaychisi",
+            exp: "<b>Izoh:</b> Yupqa tunukalar arra bilan kesilganda yirtilishi mumkin. Chilangar qaychisi tunukani tekis va silliq qirqish uchun maxsus moslashtirilgan."
+        },
+        {
+            c: "Yog'ochga ishlov",
+            q: "Randa qanday vazifani bajaradi?",
+            o: ["Yog'och sirtini tekislaydi, silliqlaydi va o'lchamga keltiradi", "Yog'ochni bo'laklarga ajratadi", "Yog'ochda teshik ochadi", "Mix qoqishda yordam beradi"],
+            a: "Yog'och sirtini tekislaydi, silliqlaydi va o'lchamga keltiradi",
+            exp: "<b>Izoh:</b> Randa (rubanok) arralangandan keyin qolgan g'adir-budurlikni yo'qotib, yog'och yuzasini silliq holatga keltiradi."
+        },
+        {
+            c: "Metallshunoslik",
+            q: "Po'lat (Steel) va Cho'yan (Cast Iron) farqi nimada?",
+            o: ["Tarkibidagi uglerod miqdorida", "Rangida", "Elektr o'tkazuvchanligida", "Og'irligida"],
+            a: "Tarkibidagi uglerod miqdorida",
+            exp: "<b>Izoh:</b> Uglerod 2.14% gacha bo'lsa - Po'lat (egiluvchan), undan ko'p bo'lsa - Cho'yan (mo'rt) hisoblanadi."
+        },
+        {
+            c: "Elektrotexnika",
+            q: "Qisqa tutashuv nega xavfli?",
+            o: ["Simlarning qizib ketishi va yong'in chiqishiga sabab bo'ladi", "Chiroq o'chib qoladi", "Tok kuchi kamayib ketadi", "Hech qanday xavfi yo'q"],
+            a: "Simlarning qizib ketishi va yong'in chiqishiga sabab bo'ladi",
+            exp: "<b>Izoh:</b> Qisqa tutashuvda qarshilik keskin pasayib, tok kuchi ortadi. Bu esa izolyatsiyaning erishi va yong'inga olib keladi."
+        },
+        {
+            c: "Pazandalik",
+            q: "Pasterizatsiya nima?",
+            o: ["Mahsulotni 100°C dan past haroratda qizdirib mikroblarni o'ldirish", "Muzlatish", "Tuzlash", "Quritish"],
+            a: "Mahsulotni 100°C dan past haroratda qizdirib mikroblarni o'ldirish",
+            exp: "<b>Izoh:</b> Pasterizatsiya sut va sharbatlarni qaynatmasdan (vitaminlarni saqlagan holda) zararsizlantirish usulidir."
+        },
+        {
+            c: "Tikuvchilik",
+            q: "Tikuv mashinasi ignasining uzun ariqchasi vazifasi nima?",
+            o: ["Yuqori ipni mato ishqalanishidan himoyalaydi", "Matoni kesadi", "Ignani sovutadi", "Mokini aylantiradi"],
+            a: "Yuqori ipni mato ishqalanishidan himoyalaydi",
+            exp: "<b>Izoh:</b> Igna matoga kirganda ip uzilmasligi uchun u maxsus uzun ariqcha ichiga yashirinadi."
+        },
+        {
+            c: "Servirovka",
+            q: "Pichoq va sanchqi qanday joylashadi?",
+            o: ["Pichoq o'ngda, sanchqi chapda", "Pichoq chapda, sanchqi o'ngda", "Ikkalasi ham o'ngda", "Likopcha ustida"],
+            a: "Pichoq o'ngda, sanchqi chapda",
+            exp: "<b>Izoh:</b> O'ng qo'l bilan pichoq ishlatilgani uchun u o'ngga, sanchqi esa chapga qo'yiladi."
+        },
+        {
+            c: "Agrotexnologiya",
+            q: "Almashlab ekish nega kerak?",
+            o: ["Tuproq unumdorligini saqlash uchun", "Suvni tejash uchun", "Hosilni tezroq olish uchun", "Chiroyli ko'rinish uchun"],
+            a: "Tuproq unumdorligini saqlash uchun",
+            exp: "<b>Izoh:</b> Bir xil ekin tuproqni kuchsizlantiradi. Ekinlar almashib ekilsa, tuproq o'zini tiklaydi."
+        },
+        {
+            c: "Kasb",
+            q: "\"Inson-Texnika\" tipidagi kasbni toping:",
+            o: ["Haydovchi", "O'qituvchi", "Sotuvchi", "Ressom"],
+            a: "Haydovchi",
+            exp: "<b>Izoh:</b> Haydovchi texnik vosita (avtomobil) bilan bevosita ishlaydi."
+        },
+        {
+            c: "Grafika",
+            q: "Ko'rinmas konturlar qanday chiziq bilan chiziladi?",
+            o: ["Shtrix (uzuq) chiziq", "Tutash yo'g'on chiziq", "Ingichka chiziq", "To'lqinsimon chiziq"],
+            a: "Shtrix (uzuq) chiziq",
+            exp: "<b>Izoh:</b> Detalning ichki, ko'zga ko'rinmas qirralari chizmada shtrix chiziqlar bilan ifodalanadi."
+        },
+        {
+            c: "Xavfsizlik",
+            q: "Quruq xonada xavfli kuchlanish necha voltdan boshlanadi?",
+            o: ["36 V", "12 V", "220 V", "5 V"],
+            a: "36 V",
+            exp: "<b>Izoh:</b> Quruq xonalarda 36V, nam joylarda 12V dan yuqori kuchlanish hayot uchun xavflidir."
+        },
+    {
+        c: "Materialshunoslik",
+        q: "Faner (Phaner) qanday material va u nimadan tashkil topgan?",
+        o: ["Toq sonli shpon qatlamlarini yelimlashdan olingan material", "Yog'och qirindisidan presslangan plita (DSP)", "Yaxlit yog'och bo'lagi", "Qog'oz qatlamlari"],
+        a: "Toq sonli shpon qatlamlarini yelimlashdan olingan material",
+        exp: "Faner mustahkam bo'lishi uchun shpon qatlamlari tolalari bir-biriga perpendikulyar qilib, toq sonda (3, 5, 7) yelimlanadi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "DSP (Yog'och qirindili plita) nimadan tayyorlanadi?",
+        o: ["Yog'och qirindilarini yelim aralashtirib issiq presslash orqali", "Shponlarni yelimlash orqali", "Yog'och unidan", "Plastmassa chiqindilaridan"],
+        a: "Yog'och qirindilarini yelim aralashtirib issiq presslash orqali",
+        exp: "DSP (Drevstrujechnaya plita) arzon mebel ishlab chiqarishda ishlatiladigan asosiy materialdir."
+    },
+    {
+        c: "Yog'ochga ishlov",
+        q: "Yog'ochning namligi oshib ketsa nima sodir bo'ladi?",
+        o: ["Yog'och bo'kadi, o'lchami kattalashadi va shakli o'zgaradi", "Yog'och quriydi va kichrayadi", "Yog'och qattiqlashadi", "Hech narsa o'zgarmaydi"],
+        a: "Yog'och bo'kadi, o'lchami kattalashadi va shakli o'zgaradi",
+        exp: "Namlikni shimgan yog'och shishadi (bo'kadi), quriganida esa yorilishi va qiyshayishi mumkin."
+    },
+    {
+        c: "Metallshunoslik",
+        q: "Po'lat va Cho'yan - ikkalasi ham temir qotishmasi. Ularning asosiy farqi nimada?",
+        o: ["Uglerod miqdorida (Po'latda 2.14% gacha, Cho'yanda ko'proq)", "Rangida", "Og'irligida", "Elektr o'tkazuvchanligida"],
+        a: "Uglerod miqdorida (Po'latda 2.14% gacha, Cho'yanda ko'proq)",
+        exp: "Uglerod metallga qattiqlik beradi, lekin 2.14% dan oshib ketsa, metall mo'rt bo'lib qoladi (Cho'yan)."
+    },
+    {
+        c: "Metallshunoslik",
+        q: "Rangli metallar guruhini toping:",
+        o: ["Mis, Alyuminiy, Qo'rg'oshin, Rux", "Temir, Po'lat, Cho'yan", "Oltin, Temir, Mis", "Alyuminiy, Po'lat, Nikel"],
+        a: "Mis, Alyuminiy, Qo'rg'oshin, Rux",
+        exp: "Temir va uning qotishmalari (po'lat, cho'yan) qora metallar, qolgan barcha metallar rangli metallar hisoblanadi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Latun (Sariq mis) qaysi metallarning qotishmasi?",
+        o: ["Mis va Rux", "Mis va Qalay", "Temir va Uglerod", "Alyuminiy va Magniy"],
+        a: "Mis va Rux",
+        exp: "Latun korroziyaga chidamli bo'lib, santexnika va mashinasozlikda keng qo'llaniladi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Bronza qaysi metallarning qotishmasi?",
+        o: ["Mis va Qalay", "Mis va Rux", "Temir va Mis", "Alyuminiy va Mis"],
+        a: "Mis va Qalay",
+        exp: "Bronza qadimdan haykallar va tangalar quyishda ishlatiladigan mustahkam qotishmadir."
+    },
+    {
+        c: "Asboblar",
+        q: "Shtangensirkul qanday o'lchamlarni o'lchaydi?",
+        o: ["Tashqi, ichki o'lchamlar va chuqurlikni", "Faqat uzunlikni", "Faqat aylana diametrini", "Burchaklarni"],
+        a: "Tashqi, ichki o'lchamlar va chuqurlikni",
+        exp: "Shtangensirkul universal o'lchov asbobi bo'lib, 0.1 mm yoki 0.05 mm aniqlikda o'lchaydi."
+    },
+    {
+        c: "Asboblar",
+        q: "Metallni qirqish uchun ishlatiladigan 'Chopqi' (Zubilo) qanday ishlaydi?",
+        o: ["Bolg'a bilan urib metallni kesadi yoki chopadi", "Metallni arralaydi", "Metallni teshadi", "Metallni silliqlaydi"],
+        a: "Bolg'a bilan urib metallni kesadi yoki chopadi",
+        exp: "Chopqi (Zubilo) qalin metallarni bo'laklash yoki sirtini tozalash uchun ishlatiladigan zarbiy kesuvchi asbobdir."
+    },
+    {
+        c: "Asboblar",
+        q: "Yog'ochga ishlov berishda 'Randa'ning vazifasi nima?",
+        o: ["Sirtni tekislash va silliqlash", "Kesish", "Teshish", "Naqsh solish"],
+        a: "Sirtni tekislash va silliqlash",
+        exp: "Randa yog'ochning g'adir-budur qismini shilib tashlab, uni silliq va o'lchamga mos holga keltiradi."
+    },
+    {
+        c: "Texnologiya",
+        q: "Egovlashda (Opilivaniye) qanday xavfsizlik qoidasiga amal qilish kerak?",
+        o: ["Egov dastasi mustahkam bo'lishi va yoriq bo'lmasligi kerak", "Egovni moylash kerak", "Egovni qizdirish kerak", "Qo'lqopsiz ishlash mumkin emas"],
+        a: "Egov dastasi mustahkam bo'lishi va yoriq bo'lmasligi kerak",
+        exp: "Dastasi bo'sh yoki yoriq egov qo'lni jarohatlashi mumkin."
+    },
+    {
+        c: "Dastgohlar",
+        q: "Tokarlik stanogining (STD-120) 'Podruchnik' qismi nima vazifani bajaradi?",
+        o: ["Keskichni (qalamni) tayanch vazifasini o'taydi", "Zagotovkani aylantiradi", "Stanokni to'xtatadi", "Markazni belgilaydi"],
+        a: "Keskichni (qalamni) tayanch vazifasini o'taydi",
+        exp: "Podruchnik keskichni ushlab turish uchun tayanch bo'lib, u harakatlanuvchi zagotovkaga yaqin joylashtiriladi."
+    },
+    {
+        c: "Asboblar",
+        q: "Metall yuzasiga chiziq chizish uchun qaysi asbob ishlatiladi?",
+        o: ["Chizg'ich (Chertilka)", "Qalam", "Bo'r", "Marker"],
+        a: "Chizg'ich (Chertilka)",
+        exp: "Metall yuzasida grafit qalam izi ko'rinmaydi va o'chib ketadi, shuning uchun o'tkir po'lat uchli chizg'ich ishlatiladi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Tunukasozlikda ishlatiladigan 'Kiyanka' bolg'asi nimadan yasaladi?",
+        o: ["Yog'och yoki qattiq rezinadan", "Po'latdan", "Cho'yandan", "Misdan"],
+        a: "Yog'och yoki qattiq rezinadan",
+        exp: "Kiyanka tunukani tekislashda (to'g'rilashda) tunuka sirtini ezib qo'ymaslik uchun yumshoqroq materialdan yasaladi."
+    },
+    {
+        c: "Grafika",
+        q: "Chizmada detalning ko'rinmas konturlari qanday chiziq bilan chiziladi?",
+        o: ["Shtrix (uzuq) chiziq", "Tutash yo'g'on chiziq", "Ingichka chiziq", "Shtrix-nuqtali chiziq"],
+        a: "Shtrix (uzuq) chiziq",
+        exp: "Shtrix chiziq detal ichidagi teshiklar yoki ko'zga tashlanmaydigan qirralarni ifodalaydi."
+    },
+
+    // --- II. ELEKTROTEXNIKA VA ROBOTOTEXNIKA ---
+    {
+        c: "Elektrotexnika",
+        q: "Elektr qarshiligining o'lchov birligi nima?",
+        o: ["Om (Ω)", "Volt (V)", "Amper (A)", "Vatt (W)"],
+        a: "Om (Ω)",
+        exp: "Qarshilik birligi nemis fizigi Georg Om sharafiga nomlangan."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Zanjirdagi tok kuchini o'lchaydigan asbob?",
+        o: ["Ampermetr", "Voltmetr", "Ommetr", "Schetchik"],
+        a: "Ampermetr",
+        exp: "Ampermetr zanjirga har doim ketma-ket ulanadi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Kuchlanishni o'lchaydigan asbob?",
+        o: ["Voltmetr", "Ampermetr", "Vattmetr", "Reostat"],
+        a: "Voltmetr",
+        exp: "Voltmetr iste'molchiga parallel ravishda ulanadi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Qisqa tutashuv nima?",
+        o: ["Tok o'tkazuvchi simlarning izolyatsiyasiz bir-biriga tegib ketishi", "Elektrning o'chishi", "Lampochkaning kuyishi", "Tokning uzilishi"],
+        a: "Tok o'tkazuvchi simlarning izolyatsiyasiz bir-biriga tegib ketishi",
+        exp: "Qisqa tutashuvda qarshilik keskin kamayib, tok kuchi ortadi, bu yong'inga sabab bo'lishi mumkin."
+    },
+    {
+        c: "Xavfsizlik",
+        q: "Quruq xonalarda inson hayoti uchun xavfli kuchlanish chegarasi qancha?",
+        o: ["36 Voltdan yuqori", "12 Volt", "220 Volt", "5 Volt"],
+        a: "36 Voltdan yuqori",
+        exp: "Nam va xavfli xonalarda bu chegara 12 Volt hisoblanadi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "O'tkazgich materiallarga nimalar kiradi?",
+        o: ["Mis, Alyuminiy, Temir, Suv", "Rezina, Plastmassa, Shisha", "Yog'och, Chinni", "Havo, Matolar"],
+        a: "Mis, Alyuminiy, Temir, Suv",
+        exp: "Metalllar va elektrolitlar elektr tokini yaxshi o'tkazadi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Izolyator (Dielektrik) materiallarga nimalar kiradi?",
+        o: ["Rezina, Shisha, Chinni, Plastmassa", "Mis, Oltin", "Sho'r suv", "Nam tuproq"],
+        a: "Rezina, Shisha, Chinni, Plastmassa",
+        exp: "Izolyatorlar erkin elektronlarga ega emas, shuning uchun tok o'tkazmaydi."
+    },
+    {
+        c: "Elektronika",
+        q: "Yarimo'tkazgichli diodning asosiy xususiyati nima?",
+        o: ["Tokni faqat bir yo'nalishda o'tkazadi", "Tokni kuchaytiradi", "Elektr saqlaydi", "Yorug'lik taratmaydi"],
+        a: "Tokni faqat bir yo'nalishda o'tkazadi",
+        exp: "Diod elektr 'klapan' vazifasini bajarib, o'zgaruvchan tokni o'zgarmas tokka aylantirishda ishlatiladi."
+    },
+    {
+        c: "Elektronika",
+        q: "Svetodiod (LED) nima?",
+        o: ["Elektr tokini yorug'likka aylantiruvchi yarimo'tkazgich", "Isitish elementi", "Tok manbai", "Ovoz kuchaytirgich"],
+        a: "Elektr tokini yorug'likka aylantiruvchi yarimo'tkazgich",
+        exp: "LED (Light Emitting Diode) energiyani tejovchi zamonaviy yoritish manbaidir."
+    },
+    {
+        c: "Energetika",
+        q: "GES (Gidroelektr stansiya) elektrni nimadan oladi?",
+        o: ["Suv oqimi kuchidan", "Ko'mir yoqishdan", "Quyosh nurlaridan", "Shamol kuchidan"],
+        a: "Suv oqimi kuchidan",
+        exp: "GESlar daryo suvini to'g'on orqali o'tkazib, turbinalarni aylantirish hisobiga elektr ishlab chiqaradi."
+    },
+    {
+        c: "Robototexnika",
+        q: "Robotning 'ko'zi' yoki 'qulog'i' vazifasini bajaruvchi qism nima deyiladi?",
+        o: ["Sensor (Datchik)", "Drayver", "Motor", "Kontroller"],
+        a: "Sensor (Datchik)",
+        exp: "Sensorlar atrof-muhitdagi o'zgarishlarni (yorug'lik, masofa, tovush) sezadi va signal beradi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Quyosh panellari qanday energiyani elektrga aylantiradi?",
+        o: ["Yorug'lik energiyasini", "Issiqlik energiyasini", "Mexanik energiyani", "Kimyoviy energiyani"],
+        a: "Yorug'lik energiyasini",
+        exp: "Fotoelementlar quyosh nurini to'g'ridan-to'g'ri elektr tokiga aylantiradi."
+    },
+    {
+        c: "Avtomatika",
+        q: "Avtomatik boshqarish tizimiga nima misol bo'ladi?",
+        o: ["Svetofor, Kir yuvish mashinasi", "Velosiped", "Arra", "Qaychi"],
+        a: "Svetofor, Kir yuvish mashinasi",
+        exp: "Bu qurilmalar inson aralashuvisiz oldindan berilgan dastur asosida ishlaydi."
+    },
+    {
+        c: "Elektronika",
+        q: "Reistorning vazifasi nima?",
+        o: ["Tokni cheklash va kuchlanishni pasaytirish", "Tokni kuchaytirish", "Elektr saqlash", "Yorug'lik taratish"],
+        a: "Tokni cheklash va kuchlanishni pasaytirish",
+        exp: "Rezistor zanjirga ma'lum qarshilik kiritib, boshqa detallarni kuyishdan saqlaydi."
+    },
+    {
+        c: "Xavfsizlik",
+        q: "Tok urgan odamga birinchi yordam ko'rsatishda nima qilish kerak?",
+        o: ["Darhol tok manbaidan ajratish kerak", "Suv sepish kerak", "Qo'lidan ushlab tortish kerak", "Temir bilan urish kerak"],
+        a: "Darhol tok manbaidan ajratish kerak",
+        exp: "O'zini xavfga qo'ymasdan, quruq taxta yoki dielektrik buyum bilan jabrlanuvchini tokdan ajratish shart."
+    },
+
+    // --- III. PAZANDALIK VA OZIQ-OVQAT TEXNOLOGIYASI ---
+    {
+        c: "Pazandalik",
+        q: "Pasterizatsiya nima?",
+        o: ["Mahsulotni 100°C dan past haroratda qizdirib zararsizlantirish", "Muzlatish", "Tuzlash", "Quritish"],
+        a: "Mahsulotni 100°C dan past haroratda qizdirib zararsizlantirish",
+        exp: "Bu usulda mikroblar o'ladi, lekin vitaminlar va ta'm saqlanib qoladi (masalan, sutda)."
+    },
+    {
+        c: "Pazandalik",
+        q: "Qaysi vitamin yetishmasligi ko'zning ko'rish qobiliyatini pasaytiradi (Shabko'rlik)?",
+        o: ["A vitamini", "C vitamini", "B vitamini", "D vitamini"],
+        a: "A vitamini",
+        exp: "A vitamini (Retinol) sabzi, qovoq va baliq yog'ida ko'p bo'lib, ko'z nuri uchun muhim."
+    },
+    {
+        c: "Pazandalik",
+        q: "C vitamini (Askorbin kislotasi) yetishmasligi qaysi kasallikka olib keladi?",
+        o: ["Singa (Tsinga)", "Kamqonlik", "Raxit", "Buqoq"],
+        a: "Singa (Tsinga)",
+        exp: "C vitamini immunitetni oshiradi, uning yetishmasligi milk qonashiga olib keladi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Somsa uchun qanday xamir tayyorlanadi?",
+        o: ["Qatlama (Oshirma) xamir", "Suyuq xamir", "Uvalanuvchan xamir", "Biskvit xamir"],
+        a: "Qatlama (Oshirma) xamir",
+        exp: "Somsa xamiri yoyilib, yog'lanib, qat-qat qilinadi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Qovurma sho'rva va Dimlama qaysi jihati bilan farqlanadi?",
+        o: ["Dimlama o'z bug'ida past olovda pishadi, sho'rva suvda qaynatiladi", "Farqi yo'q", "Dimlama faqat go'shtdan iborat", "Sho'rva duxovkada pishadi"],
+        a: "Dimlama o'z bug'ida past olovda pishadi, sho'rva suvda qaynatiladi",
+        exp: "Dimlash - masalliqlarni qopqoq yopib, oz miqdordagi suyuqlik yoki o'z sharbatida pishirishdir."
+    },
+    {
+        c: "Servirovka",
+        q: "Pichoq va sanchqi likopchaning qaysi tomoniga qo'yiladi?",
+        o: ["Pichoq o'ngda, sanchqi chapda", "Pichoq chapda, sanchqi o'ngda", "Ikkalasi ham o'ngda", "Likopcha ustida"],
+        a: "Pichoq o'ngda, sanchqi chapda",
+        exp: "Etiket qoidasiga ko'ra, ishlatish qulayligi uchun pichoq o'ng qo'lga, sanchqi chap qo'lga mo'ljallanadi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Xamirturush (Droja) xamirga qanday ta'sir qiladi?",
+        o: ["Xamirni g'ovak qiladi va oshiradi", "Xamirni qotiradi", "Xamirga rang beradi", "Xamirni shirin qiladi"],
+        a: "Xamirni g'ovak qiladi va oshiradi",
+        exp: "Xamirturush zamburug'lari ko'payib, karbonat angidrid gazini chiqaradi, bu xamirni 'ko'taradi'."
+    },
+    {
+        c: "Karving",
+        q: "Karving san'ati nima?",
+        o: ["Meva va sabzavotlarga badiiy shakl berish (o'ymakorlik)", "Dasturxon bezash", "Taom pishirish", "Idish yuvish"],
+        a: "Meva va sabzavotlarga badiiy shakl berish (o'ymakorlik)",
+        exp: "Karving maxsus pichoqlar yordamida tarvuz, qovun, sabzi kabi mahsulotlardan gullar yasashdir."
+    },
+    {
+        c: "Gigiyena",
+        q: "Oshxonada 'Xom' va 'Pishgan' mahsulotlar uchun taxtakachlar qanday bo'lishi kerak?",
+        o: ["Alohida-alohida bo'lishi shart", "Bitta bo'lsa ham bo'ladi", "Faqat pishgan mahsulot uchun kerak", "Farqi yo'q"],
+        a: "Alohida-alohida bo'lishi shart",
+        exp: "Xom go'shtdagi bakteriyalar pishgan taomga o'tmasligi uchun taxtakachlar alohida bo'lishi kerak."
+    },
+    {
+        c: "Pazandalik",
+        q: "Blanşirlash (Blanching) nima?",
+        o: ["Mahsulotni qisqa muddat qaynoq suvga botirib olish", "Yog'da qovurish", "Muzlatish", "Tuzlash"],
+        a: "Mahsulotni qisqa muddat qaynoq suvga botirib olish",
+        exp: "Bu usul sabzavotlar rangini saqlash yoki po'stini oson archish uchun ishlatiladi (masalan, pomidor)."
+    },
+    {
+        c: "Pazandalik",
+        q: "Sutni uzoq saqlash uchun qaysi ishlov berish turi qo'llaniladi?",
+        o: ["Sterilizatsiya yoki Pasterizatsiya", "Filtrlash", "Muzlatish", "Quritish"],
+        a: "Sterilizatsiya yoki Pasterizatsiya",
+        exp: "Sterilizatsiya yuqori haroratda barcha mikroblarni o'ldiradi va sutni uzoq saqlash imkonini beradi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Tuxumning yangiligini qanday aniqlash mumkin?",
+        o: ["Suvga solganda cho'ksa - yangi, qalqib qolsa - eski", "Rangi oq bo'lsa - yangi", "Katta bo'lsa - yangi", "Hidi bo'lmasa - eski"],
+        a: "Suvga solganda cho'ksa - yangi, qalqib qolsa - eski",
+        exp: "Eski tuxum ichida havo bo'shlig'i kattalashadi, shuning uchun u suv yuzasiga qalqib chiqadi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Qiyma, piyoz, guruch va ziravorlar bilan tok bargiga o'ralgan taom?",
+        o: ["Do'lma", "Manti", "Chuchvara", "Xonim"],
+        a: "Do'lma",
+        exp: "Do'lma - tok bargi yoki sabzavotlar ichiga qiyma to'ldirib pishiriladigan milliy taom."
+    },
+    {
+        c: "Pazandalik",
+        q: "Biskvit xamiri asosini nimalar tashkil qiladi?",
+        o: ["Tuxum, shakar va un", "Yog', suv va un", "Sut va xamirturush", "Faqat un va suv"],
+        a: "Tuxum, shakar va un",
+        exp: "Biskvit tuxum oqi ko'pirtirilgani hisobiga g'ovak va yumshoq bo'ladi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Kaliy permanganat (Margansovka) eritmasi oshxonada nima uchun ishlatiladi?",
+        o: ["Sabzavot va mevalarni zararsizlantirish (yuvish) uchun", "Taomga rang berish uchun", "Shirinlik qo'shish uchun", "Idish yuvish uchun"],
+        a: "Sabzavot va mevalarni zararsizlantirish (yuvish) uchun",
+        exp: "Och pushti rangli eritma mikroblarni o'ldirish xususiyatiga ega."
+    },
+
+    // --- IV. TIKUVCHILIK VA GAZLAMASHUNOSLIK ---
+    {
+        c: "Gazlamashunoslik",
+        q: "Tabiiy tolalarni aniqlang:",
+        o: ["Paxta, Ipak, Jun, Zig'ir", "Kapron, Neylon", "Viskoza, Atsetat", "Poliester, Lavsan"],
+        a: "Paxta, Ipak, Jun, Zig'ir",
+        exp: "Tabiiy tolalar o'simlik (paxta) yoki hayvonlardan (ipak, jun) olinadi."
+    },
+    {
+        c: "Gazlamashunoslik",
+        q: "Sintetik tolalar nimadan olinadi?",
+        o: ["Neft, gaz va toshko'mir mahsulotlaridan", "Daraxt yog'ochidan", "Ipak qurtidan", "Paxtadan"],
+        a: "Neft, gaz va toshko'mir mahsulotlaridan",
+        exp: "Sintetik tolalar (kapron, lavsan) to'liq kimyoviy usulda ishlab chiqariladi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Tikuv mashinasida ignaning uzun ariqchasi (jelobok) vazifasi?",
+        o: ["Yuqori ipni mato ishqalanishidan saqlaydi", "Matoni kesadi", "Mokini aylantiradi", "Chokni mustahkamlaydi"],
+        a: "Yuqori ipni mato ishqalanishidan saqlaydi",
+        exp: "Igna matoga kirib chiqqanda ip uzilmasligi uchun u ariqchaga yashirinadi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Andaza (Lekalo) matoning qaysi tomoniga chiziladi?",
+        o: ["Teskari tomoniga", "O'ng tomoniga", "Farqi yo'q", "Ikkala tomoniga"],
+        a: "Teskari tomoniga",
+        exp: "Chiziqlar va bo'r izlari kiyimning o'ng tomonida ko'rinmasligi uchun andaza teskarisiga chiziladi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Tabiiy ipak qayerdan olinadi?",
+        o: ["Ipak qurti pillasidan", "O'rgimchak to'rida", "Paxta g'o'zasidan", "Zig'ir poyasidan"],
+        a: "Ipak qurti pillasidan",
+        exp: "Tut ipak qurti o'zidan yupqa tola (pilla) o'raydi, bu esa tabiiy ipak xomashyosidir."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Mokili chok (Mashina choki) hosil bo'lishida nechta ip qatnashadi?",
+        o: ["Ikki (ustki va ostki)", "Bir", "Uch", "To'rt"],
+        a: "Ikki (ustki va ostki)",
+        exp: "Tikuv mashinasida chok ignadagi (ustki) va mokidagi (ostki) iplarning o'rilishidan hosil bo'ladi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Bichish qaychisi oddiy qaychidan nimasi bilan farq qiladi?",
+        o: ["Pastki halqasi kattaroq va tig'lari uzunroq bo'ladi", "Kichkina bo'ladi", "Tig'lari o'tmas bo'ladi", "Plastmassadan yasaladi"],
+        a: "Pastki halqasi kattaroq va tig'lari uzunroq bo'ladi",
+        exp: "Bichish qaychisi matoni stoldan ko'tarmasdan tekis qirqishga moslashtirilgan."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Dazmollashda 'Dekatirlash' nima?",
+        o: ["Matoga suv purkab yoki bug'lab dazmollash (kirishishini oldini olish)", "Matoni quritish", "Matoni bo'yash", "Kiyimni taxlash"],
+        a: "Matoga suv purkab yoki bug'lab dazmollash (kirishishini oldini olish)",
+        exp: "Bichishdan oldin mato yuvilganda kichrayib qolmasligi uchun unga issiq bug' bilan ishlov beriladi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Qaysi chok turi qo'l choklariga kirmaydi?",
+        o: ["Zigzag chok", "Koklam chok", "Qiya chok", "Tugma qadash"],
+        a: "Zigzag chok",
+        exp: "Zigzag chok faqat tikuv mashinasida bajariladigan chok turidir."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Tikuv mashinasi yurmay qolsa yoki og'ir yursa sababi nima bo'lishi mumkin?",
+        o: ["Moylanmagan yoki ip o'ralib qolgan", "Ignasi singan", "Tok yo'q", "Chirog'i kuygan"],
+        a: "Moylanmagan yoki ip o'ralib qolgan",
+        exp: "Mashina mexanizmlari ishqalanishni kamaytirish uchun vaqtida tozalanib, moylanishi kerak."
+    },
+    {
+        c: "Gazlamashunoslik",
+        q: "Viskoza tolasi qanday tola hisoblanadi?",
+        o: ["Sun'iy tola (yog'och sellyulozasidan olingan)", "Tabiiy tola", "Sintetik tola", "Mineral tola"],
+        a: "Sun'iy tola (yog'och sellyulozasidan olingan)",
+        exp: "Viskoza tabiatdagi xomashyodan (yog'och) kimyoviy yo'l bilan olinadigan sun'iy toladir."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Overlok mashinasi nima uchun kerak?",
+        o: ["Mato qirralarini to'kilib ketishdan saqlash va tekislash uchun", "Tugma qadash uchun", "Kashta tikish uchun", "Mato to'qish uchun"],
+        a: "Mato qirralarini to'kilib ketishdan saqlash va tekislash uchun",
+        exp: "Overlok mato chetini qirqib, uni maxsus chok bilan o'rab chiqadi."
+    },
+    {
+        c: "Moda",
+        q: "Kiyimdagi 'Siluet' nima?",
+        o: ["Kiyimning tashqi shakli (konturi)", "Kiyimning rangi", "Kiyimning matosi", "Kiyimning narxi"],
+        a: "Kiyimning tashqi shakli (konturi)",
+        exp: "Siluet kiyimning umumiy ko'rinishini belgilaydi (masalan: to'g'ri, trapetsiya, yopishgan)."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Igna raqami (masalan, №90, №100) nimani bildiradi?",
+        o: ["Ignaning yo'g'onligini (diametrini)", "Ignaning uzunligini", "Ignaning narxini", "Ignaning rangini"],
+        a: "Ignaning yo'g'onligini (diametrini)",
+        exp: "Raqam qancha katta bo'lsa, igna shuncha yo'g'on bo'ladi va qalin matolar uchun ishlatiladi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Applikatsiya nima?",
+        o: ["Matoga boshqa mato bo'laklarini tikib yoki yelimlab naqsh hosil qilish", "Mato to'qish", "Kiyimni bo'yash", "Tugma qadash"],
+        a: "Matoga boshqa mato bo'laklarini tikib yoki yelimlab naqsh hosil qilish",
+        exp: "Applikatsiya kiyimlarni bezashning keng tarqalgan usulidir."
+    },
+
+    // --- V. QISHLOQ XO'JALIGI VA KASB TANLASH ---
+    {
+        c: "Agrotexnologiya",
+        q: "Almashlab ekish (Sevooborot) nima uchun muhim?",
+        o: ["Tuproq unumdorligini saqlash va kasalliklarni kamaytirish uchun", "Faqat ko'p hosil olish uchun", "Yerni chiroyli qilish uchun", "Suvni tejash uchun"],
+        a: "Tuproq unumdorligini saqlash va kasalliklarni kamaytirish uchun",
+        exp: "Bir xil ekin tuproqni kuchsizlantiradi, almashlab ekish esa tuproqni boyitadi (masalan, beda ekish)."
+    },
+    {
+        c: "Agrotexnologiya",
+        q: "Gidroponika usuli nima?",
+        o: ["O'simlikni tuproqsiz, ozuqali eritmada o'stirish", "Issiqxonada o'stirish", "Ochiq dalada o'stirish", "Daraxt payvandlash"],
+        a: "O'simlikni tuproqsiz, ozuqali eritmada o'stirish",
+        exp: "Gidroponika suv va ozuqa moddalarini tejash imkonini beruvchi zamonaviy dehqonchilik usulidir."
+    },
+    {
+        c: "Agrotexnologiya",
+        q: "Mineral o'g'itlarga nimalar kiradi?",
+        o: ["Azot, Fosfor, Kaliy", "Go'ng, Chirindi", "Suv, Havo", "Qum, Tuproq"],
+        a: "Azot, Fosfor, Kaliy",
+        exp: "Mineral o'g'itlar kimyoviy zavodlarda ishlab chiqarilib, o'simlik o'sishini tezlashtiradi."
+    },
+    {
+        c: "Chorvachilik",
+        q: "Inkubator nima vazifani bajaradi?",
+        o: ["Tuxumdan sun'iy ravishda jo'ja ochirish", "Tovuqlarni boqish", "Tuxumni yuvish", "Tuxumni sovutish"],
+        a: "Tuxumdan sun'iy ravishda jo'ja ochirish",
+        exp: "Inkubator tovuq bosib o'tirmasdan, kerakli harorat va namlikda jo'ja chiqarish uskunasi."
+    },
+    {
+        c: "Kasb",
+        q: "\"Inson-Texnika\" tipidagi kasblarni ko'rsating:",
+        o: ["Haydovchi, Tokar, Dasturchi", "O'qituvchi, Shifokor", "Ressom, Shoir", "Bog'bon, Veterinar"],
+        a: "Haydovchi, Tokar, Dasturchi",
+        exp: "Bu kasb egalari asosiy ish vaqtini texnika va mexanizmlar bilan o'tkazadi."
+    },
+    {
+        c: "Kasb",
+        q: "\"Inson-Tabiat\" tipidagi kasblar:",
+        o: ["Agronom, Veterinar, Ekolog", "Sotuvchi, Sartarosh", "Muhandis, Quruvchi", "Hisobchi, Kotib"],
+        a: "Agronom, Veterinar, Ekolog",
+        exp: "Bu kasblar o'simliklar, hayvonlar va tabiat bilan ishlashni talab qiladi."
+    },
+    {
+        c: "Iqtisod",
+        q: "Marketing nima?",
+        o: ["Bozor talabini o'rganish va mahsulot sotish faoliyati", "Faqat ishlab chiqarish", "Soliq to'lash", "Xayriya qilish"],
+        a: "Bozor talabini o'rganish va mahsulot sotish faoliyati",
+        exp: "Marketing xaridor ehtiyojini aniqlashdan tortib, mahsulotni unga yetkazib berguncha bo'lgan jarayondir."
+    },
+    {
+        c: "Iqtisod",
+        q: "Biznes reja (Business Plan) nima uchun kerak?",
+        o: ["Tadbirkorlik faoliyatini rejalashtirish va foydani hisoblash uchun", "Faqat kredit olish uchun", "Soliqdan qochish uchun", "Xodimlarni ishlatish uchun"],
+        a: "Tadbirkorlik faoliyatini rejalashtirish va foydani hisoblash uchun",
+        exp: "Biznes reja kelajakdagi xarajatlar, daromadlar va xatarlarni oldindan ko'rishga yordam beradi."
+    },
+    {
+        c: "Agrotexnologiya",
+        q: "Payvandlash (O'simliklarda) nima?",
+        o: ["Bir o'simlik qismini boshqa o'simlikka ulash", "Daraxtni kesish", "Daraxtni sug'orish", "Urug' ekish"],
+        a: "Bir o'simlik qismini boshqa o'simlikka ulash",
+        exp: "Payvandlash orqali yovvoyi daraxtlarni madaniy navga aylantirish yoki hosildorlikni oshirish mumkin."
+    },
+    {
+        c: "Ekologiya",
+        q: "Retsikling (Qayta ishlash) nima?",
+        o: ["Chiqindilardan yangi mahsulot ishlab chiqarish", "Chiqindini yoqib yuborish", "Chiqindini ko'mib tashlash", "Chiqindini daryoga tashlash"],
+        a: "Chiqindilardan yangi mahsulot ishlab chiqarish",
+        exp: "Qayta ishlash tabiiy resurslarni tejaydi va atrof-muhitni ifloslanishdan saqlaydi."
+    },
+
+    // --- VI. ARALASH VA MANTIQIY SAVOLLAR ---
+    {
+        c: "Texnologiya",
+        q: "3D Printer nima vazifani bajaradi?",
+        o: ["Kompyuter modeli asosida hajmli buyumlar yaratadi", "Qog'ozga rasm chiqaradi", "Matn teradi", "Musiqa qo'yadi"],
+        a: "Kompyuter modeli asosida hajmli buyumlar yaratadi",
+        exp: "3D printer plastmassa yoki boshqa materialni qatlam-qatlam quyish orqali buyum yasaydi."
+    },
+    {
+        c: "Dizayn",
+        q: "Interyer dizayni nima?",
+        o: ["Bino ichki ko'rinishini bezash va jihozlash", "Bino tashqi ko'rinishi", "Kiyim modasi", "Avtomobil dizayni"],
+        a: "Bino ichki ko'rinishini bezash va jihozlash",
+        exp: "Interyer odamlar uchun qulay va chiroyli muhit yaratish bilan shug'ullanadi."
+    },
+    {
+        c: "Transport",
+        q: "Velosipedning harakatlantiruvchi qismi qaysi?",
+        o: ["Pedal va zanjir uzatmasi", "Rul", "O'rindiq", "G'ildirak spitsalari"],
+        a: "Pedal va zanjir uzatmasi",
+        exp: "Odam kuchini g'ildirakka uzatuvchi mexanizm pedal va zanjirdan iborat."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Kley (Yelim) surilgandan so'ng nima uchun biroz kutish kerak (ochiq ushlab turish)?",
+        o: ["Yelim tarkibidagi erituvchi bug'lanib, yopishqoqlik ortishi uchun", "Yelim qurib qolishi uchun", "Yelim rangini o'zgartirishi uchun", "Shart emas, darhol yopishtirish kerak"],
+        a: "Yelim tarkibidagi erituvchi bug'lanib, yopishqoqlik ortishi uchun",
+        exp: "Ko'p yelimlar (masalan, moment) surilgach, biroz tursa mustahkamroq yopishadi."
+    },
+    {
+        c: "Fizika/Texnika",
+        q: "Richag (Sodda mexanizm) nima uchun ishlatiladi?",
+        o: ["Kuchdan yutish yoki harakatni o'zgartirish uchun", "Faqat og'irlikni o'lchash uchun", "Masofani o'lchash uchun", "Tezlikni kamaytirish uchun"],
+        a: "Kuchdan yutish yoki harakatni o'zgartirish uchun",
+        exp: "Arximed aytganidek: 'Menga tayanch nuqtasini bering, Yerni o'rnidan qo'zg'ataman'."
+    },
+    {
+        c: "Xavfsizlik",
+        q: "Yong'in sodir bo'lganda qaysi raqamga qo'ng'iroq qilinadi?",
+        o: ["101", "102", "103", "104"],
+        a: "101",
+        exp: "O'zbekistonda Favqulodda vaziyatlar (yong'in) xizmati raqami 101."
+    },
+    {
+        c: "Xavfsizlik",
+        q: "Gaz hidi chiqqanda nima qilish mumkin emas?",
+        o: ["Chiroqni yoqish yoki ochiq olov ishlatish", "Derazalarni ochish", "Gaz kranini yopish", "Tashqariga chiqish"],
+        a: "Chiroqni yoqish yoki ochiq olov ishlatish",
+        exp: "Elektr uchquni yoki olov gaz to'plangan xonada portlashga olib kelishi mumkin."
+    },
+    {
+        c: "Kompyuter Grafikasi",
+        q: "Piksel nima?",
+        o: ["Raqamli tasvirning eng kichik nuqtasi", "Kompyuter sichqonchasi", "Klaviatura tugmasi", "Internet tezligi"],
+        a: "Raqamli tasvirning eng kichik nuqtasi",
+        exp: "Barcha raqamli rasmlar millionlab mayda rangli nuqtalar (piksellar)dan tashkil topgan."
+    },
+    {
+        c: "Hunarmandchilik",
+        q: "Kulolchilikda asosiy xomashyo nima?",
+        o: ["Tuproq (Loy)", "Yog'och", "Temir", "Ipak"],
+        a: "Tuproq (Loy)",
+        exp: "Kulollar maxsus loydan ko'za, lagan va boshqa idishlar yasaydilar."
+    },
+    {
+        c: "Hunarmandchilik",
+        q: "Ganchkorlik nima?",
+        o: ["Ganchdan (gipsdan) naqshlar o'yish san'ati", "Yog'och o'ymakorligi", "Kashtachilik", "Temirchilik"],
+        a: "Ganchdan (gipsdan) naqshlar o'yish san'ati",
+        exp: "Ganchkorlik O'zbekistonda qadimdan rivojlangan binolarni bezash san'atidir."
+    },
+    {
+        c: "Texnologiya",
+        q: "Konveyer nima?",
+        o: ["Mahsulotni bir joydan ikkinchi joyga uzluksiz tashuvchi mexanizm", "Yuk mashinasi", "Omborxona", "Robot qo'l"],
+        a: "Mahsulotni bir joydan ikkinchi joyga uzluksiz tashuvchi mexanizm",
+        exp: "Genri Ford konveyer usulini joriy qilib, ishlab chiqarishni keskin tezlashtirgan."
+    },
+    {
+        c: "Elektr",
+        q: "Batareyka (Galvanik element) qanday energiya manbai?",
+        o: ["Kimyoviy energiyani elektrga aylantiruvchi manba", "Mexanik manba", "Issiqlik manbai", "Abadiy dvigatel"],
+        a: "Kimyoviy energiyani elektrga aylantiruvchi manba",
+        exp: "Batareya ichidagi kimyoviy reaksiyalar hisobiga elektr toki hosil bo'ladi."
+    },
+    {
+        c: "Qurilish",
+        q: "Sement nima?",
+        o: ["Qurilishda ishlatiladigan bog'lovchi kukun", "Devor bo'yog'i", "Tom yopish materiali", "Pardozlash toshi"],
+        a: "Qurilishda ishlatiladigan bog'lovchi kukun",
+        exp: "Sement suv bilan aralashganda toshdek qotadi va beton hosil qiladi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Choy damlashda 'Qaytarish' nima uchun kerak?",
+        o: ["Choyning ta'mi va rangi bir xil chiqishi uchun", "Choyni sovutish uchun", "Choyni ko'paytirish uchun", "Shart emas"],
+        a: "Choyning ta'mi va rangi bir xil chiqishi uchun",
+        exp: "Qaytarish (3 marta) choy barglaridagi moddalarning suvga to'liq chiqishini ta'minlaydi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Napiorstok (Angishvona) nima uchun kerak?",
+        o: ["Qo'lda tikishda igna barmog'iga kirmasligi uchun", "Ipni uzish uchun", "Tugma qadash uchun", "Chokni so'kish uchun"],
+        a: "Qo'lda tikishda igna barmog'iga kirmasligi uchun",
+        exp: "Angishvona metall yoki plastmassadan yasalib, o'rta barmoqqa kiyiladi va ignani itarishda himoya qiladi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Yog'och teksturasi nima?",
+        o: ["Yog'och kesilganda hosil bo'ladigan tabiiy naqsh", "Yog'ochning rangi", "Yog'ochning qattiqligi", "Yog'ochning og'irligi"],
+        a: "Yog'och kesilganda hosil bo'ladigan tabiiy naqsh",
+        exp: "Har bir daraxt turi o'ziga xos teksturaga (yillik halqalar ko'rinishiga) ega."
+    },
+    {
+        c: "Asboblar",
+        q: "Burav (Sverlo) nima uchun ishlatiladi?",
+        o: ["Teshik ochish uchun", "Mix qoqish uchun", "Kesish uchun", "Silliqlash uchun"],
+        a: "Teshik ochish uchun",
+        exp: "Burav (parma) aylanma harakat qilib, materialni o'yib teshik hosil qiladi."
+    },
+    {
+        c: "Elektrotexnika",
+        q: "Transformator nima qiladi?",
+        o: ["Kuchlanishni oshiradi yoki pasaytiradi", "Tokni to'g'rilaydi", "Elektr ishlab chiqaradi", "Tokni o'chiradi"],
+        a: "Kuchlanishni oshiradi yoki pasaytiradi",
+        exp: "Transformatorlar elektr energiyasini uzoq masofaga yo'qotishsiz uzatishda muhim rol o'ynaydi."
+    },
+    {
+        c: "Kasb",
+        q: "Menejer kim?",
+        o: ["Boshqaruvchi, tashkilotchi", "Sotuvchi", "Ishchi", "Qo'riqchi"],
+        a: "Boshqaruvchi, tashkilotchi",
+        exp: "Menejer korxona yoki loyihaning samarali ishlashini tashkil qiladi."
+    },
+    {
+        c: "Texnika",
+        q: "Podshipnikning vazifasi nima?",
+        o: ["Aylanuvchi qismlarda ishqalanishni kamaytirish", "Tezlikni oshirish", "Harakatni to'xtatish", "Detalni qizdirish"],
+        a: "Aylanuvchi qismlarda ishqalanishni kamaytirish",
+        exp: "Podshipniklar val va o'qlarning yengil aylanishini ta'minlaydi."
+    },
+    {
+        c: "Pazandalik",
+        q: "Palov pishirishda sabzini qanday to'g'rash kerak?",
+        o: ["Somoncha shaklida", "Kubik shaklida", "Halqa shaklida", "Mayda qirg'ichdan o'tkazib"],
+        a: "Somoncha shaklida",
+        exp: "Somoncha to'g'rash palovning an'anaviy va to'g'ri texnologiyasidir."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Mato o'ngini qanday aniqlash mumkin?",
+        o: ["Rangi tiniqroq, naqshlari aniq va silliq bo'ladi", "Tukli bo'ladi", "Xira bo'ladi", "Teshiklari bo'ladi"],
+        a: "Rangi tiniqroq, naqshlari aniq va silliq bo'ladi",
+        exp: "Matoning o'ng tomoni (yuzi) doimo sifatli ishlov berilgan bo'ladi."
+    },
+    {
+        c: "Qishloq xo'jaligi",
+        q: "Tut ipak qurti nima bilan oziqlanadi?",
+        o: ["Tut bargi bilan", "O't bilan", "Don bilan", "Go'sht bilan"],
+        a: "Tut bargi bilan",
+        exp: "Ipak qurti faqat tut daraxti barglarini iste'mol qiladi."
+    },
+    {
+        c: "Yog'ochga ishlov",
+        q: "Lobzik (Qil arra) nima uchun ishlatiladi?",
+        o: ["Faner va yupqa taxtalardan murakkab egri shakllarni kesish uchun", "Katta to'sinlarni kesish uchun", "Temir kesish uchun", "Mix sug'urish uchun"],
+        a: "Faner va yupqa taxtalardan murakkab egri shakllarni kesish uchun",
+        exp: "Lobzik badiiy o'ymakorlikda eng kerakli asbobdir."
+    },
+    {
+        c: "Avtomatika",
+        q: "Dron (Uchuvchisiz qurilma) qishloq xo'jaligida nima uchun ishlatiladi?",
+        o: ["Dalalarni nazorat qilish va dori sepish uchun", "Yuk tashish uchun", "Hayvonlarni boqish uchun", "Yerni haydash uchun"],
+        a: "Dalalarni nazorat qilish va dori sepish uchun",
+        exp: "Dronlar katta maydonlarni tez va aniq dori bilan ishlash imkonini beradi."
+    },
+    {
+        c: "Elektr",
+        q: "Elektr choynakdagi suv nima hisobiga isiydi?",
+        o: ["Tok o'tganda spiralning (TEN) qizishi hisobiga", "Kimyoviy reaksiya hisobiga", "Bosim hisobiga", "Yorug'lik hisobiga"],
+        a: "Tok o'tganda spiralning (TEN) qizishi hisobiga",
+        exp: "Elektr toki o'tkazgichdan o'tganda issiqlik ajralib chiqadi (Joul-Lens qonuni)."
+    },
+    {
+        c: "Pazandalik",
+        q: "Garnir nima?",
+        o: ["Asosiy taom yoniga qo'shib beriladigan qo'shimcha (guruch, kartoshka)", "Ichimlik", "Shirinlik", "Salat"],
+        a: "Asosiy taom yoniga qo'shib beriladigan qo'shimcha (guruch, kartoshka)",
+        exp: "Garnir taomning to'yimliligini oshiradi va uni bezaydi."
+    },
+    {
+        c: "Tikuvchilik",
+        q: "Santilentr (Santimetr tasmasi) uzunligi odatda qancha bo'ladi?",
+        o: ["150 sm", "100 sm", "50 sm", "200 sm"],
+        a: "150 sm",
+        exp: "Standart tikuvchilik tasmasi 150 sm uzunlikda bo'ladi."
+    },
+    {
+        c: "Materialshunoslik",
+        q: "Rezina nimadan olinadi?",
+        o: ["Kauchukdan", "Neftdan", "Paxtadan", "Temirdan"],
+        a: "Kauchukdan",
+        exp: "Tabiiy kauchuk geveya daraxti sharbatidan olinadi, keyin vulkanizatsiya qilinib rezina olinadi."
+    }
+];
+
+     
+     
+
+    // Qolgan savollarni ko'paytirish (Demo uchun)
+    const extra = JSON.parse(JSON.stringify(questionsDB));
+    questionsDB.push(...extra); 
+
+    // ==========================================
+    // O'YIN MANTIQI
+    // ==========================================
+    
+    let currentIndex = 0;
+    let score = 0;
+    let mistakes = 0;
+    let quizQuestions = [];
+    let timerInterval;
+    let timeRemaining = 3600;
+    
+    // Har bir savol uchun urinishlar soni
+    let currentQuestionAttempts = 0;
+    let isQuestionSolved = false;
+
+    const STORAGE_KEY = 'tech_trenajyor_v2';
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function initGame() {
+        // Yangi o'yin boshlash (har doim toza boshlanadi)
+        localStorage.removeItem(STORAGE_KEY);
+        quizQuestions = shuffle([...questionsDB]); 
+        currentIndex = 0;
+        score = 0;
+        mistakes = 0;
+        timeRemaining = 3600;
+        
+        startTimer();
+        updateStats();
+        renderQuestion();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateTimerDisplay();
+            if (timeRemaining <= 0) finishExam("Vaqt tugadi!");
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        const s = (timeRemaining % 60).toString().padStart(2, '0');
+        const el = document.getElementById('timer');
+        el.innerText = `${m}:${s}`;
+        if(timeRemaining < 300) el.style.color = '#dc2626';
+    }
+
+    function updateStats() {
+        document.getElementById('curr').innerText = currentIndex + 1;
+        document.getElementById('total').innerText = quizQuestions.length;
+        document.getElementById('score').innerText = score;
+        document.getElementById('mistakes').innerText = mistakes;
+    }
+
+    function renderQuestion() {
+        const area = document.getElementById('quiz-area');
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.style.display = 'none';
+        
+        // Yangi savol uchun holatni reset qilish
+        currentQuestionAttempts = 0;
+        isQuestionSolved = false;
+
+        if (currentIndex >= quizQuestions.length) {
+            finishExam("Mashg'ulot yakunlandi!");
+            return;
+        }
+
+        const q = quizQuestions[currentIndex];
+        let opts = q.o.map(opt => ({ txt: opt, isAns: opt === q.a }));
+        opts = shuffle(opts);
+
+        let html = `
+            <div class="question-card">
+                <div class="tags-row"><span class="tag">${q.c}</span></div>
+                <div class="question-text">${q.q}</div>
+                <div class="options-grid">
+                    ${opts.map((opt, i) => {
+                        const letter = String.fromCharCode(65 + i);
+                        const safeTxt = opt.txt.replace(/"/g, "&quot;");
+                        return `
+                        <button class="option-btn" onclick="checkAnswer(this, ${opt.isAns})">
+                            <span class="option-marker">${letter}</span>
+                            <span>${opt.txt}</span>
+                        </button>`;
+                    }).join('')}
+                </div>
+                <div class="feedback-box" id="fb-box">
+                    <div class="feedback-header" id="fb-header"></div>
+                    <div id="fb-text"></div>
+                </div>
+            </div>
+        `;
+        area.innerHTML = html;
+        document.querySelector('.content').scrollTop = 0;
+    }
+
+    // --- ASOSIY O'ZGARISH SHU YERDA ---
+    window.checkAnswer = (btn, isCorrect) => {
+        if (isQuestionSolved) return; // Agar to'g'ri javob topilgan bo'lsa, bosib bo'lmaydi
+
+        const q = quizQuestions[currentIndex];
+        
+        if (isCorrect) {
+            // TO'G'RI JAVOB
+            isQuestionSolved = true;
+            
+            // Ball faqat 1-urinishda beriladi
+            if (currentQuestionAttempts === 0) score++;
+
+            // Dizayn
+            btn.style.background = '#f0fdf4';
+            btn.style.borderColor = '#16a34a';
+            btn.querySelector('.option-marker').style.background = '#16a34a';
+            btn.querySelector('.option-marker').style.color = 'white';
+
+            // Izoh chiqarish
+            const fbBox = document.getElementById('fb-box');
+            fbBox.className = 'feedback-box correct';
+            fbBox.style.display = 'block';
+            document.getElementById('fb-header').innerHTML = "✅ To'g'ri!";
+            document.getElementById('fb-text').innerHTML = `<b>Javob:</b> ${q.a}<br><br>${q.exp}`;
+
+            // Barcha tugmalarni o'chirish
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            
+            // Keyingi tugmasini ko'rsatish
+            document.getElementById('next-btn').style.display = 'block';
+
+        } else {
+            // XATO JAVOB
+            mistakes++;
+            currentQuestionAttempts++;
+            
+            // Tugmani qizartirish va o'chirish (lekin boshqalarini emas!)
+            btn.style.background = '#fef2f2';
+            btn.style.borderColor = '#dc2626';
+            btn.querySelector('.option-marker').style.background = '#dc2626';
+            btn.querySelector('.option-marker').style.color = 'white';
+            btn.style.opacity = '0.6';
+            btn.disabled = true; // Faqat shu tugma bosilmaydi endi
+        }
+        updateStats();
+    };
+
+    window.nextQuestion = () => {
+        currentIndex++;
+        renderQuestion();
+        updateStats();
+    };
+
+    function finishExam(titleText) {
+        clearInterval(timerInterval);
+        const modal = document.getElementById('result-modal');
+        const percent = Math.round((score / quizQuestions.length) * 100);
+        
+        document.getElementById('res-percent').innerText = percent + '%';
+        document.getElementById('res-title').innerText = titleText;
+        document.getElementById('res-desc').innerText = `To'g'ri: ${score}, Xato: ${mistakes}`;
+        modal.style.display = 'flex';
+    }
+
+    window.restartGame = () => {
+        location.reload();
+    }
+
+    initGame();
+</script>
+</body>
+</html>
